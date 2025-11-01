@@ -1,8 +1,8 @@
--added colors to output
--added interaction via unblocking stdio
--fixed buffer size glitching 
--changed fps to liek 15
--reduced cube count to 1
+-added colors to output  
+-added interaction via unblocking stdio  
+-fixed buffer size glitching  
+-changed fps to liek 15  
+-reduced cube count to 1  
 
 # Spinning-Cube
 This is a C language code to visualize a spinning cube using just ASCII characters. Follow the guide to know more aobut the working and possible modifications. 
