@@ -1,135 +1,141 @@
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-
 float A, B, C;
 
-float cubeWidth = 20;
-int width = 160, height = 44;
-float zBuffer[160 * 44];
-char buffer[160 * 44];
-int backgroundASCIICode = ' ';
-int distanceFromCam = 100;
-float horizontalOffset;
-float K1 = 40;
+		float cubeWidth = 20;
+		int width = 80, height = 22;
+		float zBuffer[80 * 22];
+		char buffer[80 * 22];
+		int backgroundASCIICode = ' ';			//zmienne duzo zmiennych
+		int distanceFromCam = 100;
+		float horizontalOffset;
+		float K1 = 40;
 
-float incrementSpeed = 0.6;
+		float incrementSpeed = 0.6;
 
-float x, y, z;
-float ooz;
-int xp, yp;
-int idx;
+		float x, y, z;
+		float ooz;
+		int xp, yp;
+		int idx;
 
-float calculateX(int i, int j, int k) {
-  return (
-    j * sin(A) * sin(B) * cos(C) - k * cos(A) * sin(B) * cos(C) + 
-    j * cos(A) * sin(C) + k * sin(A) * sin(C) + i * cos(B) * cos(C)
-    );
-}
+		float calculateX(int i, int j, int k) //obliczenie polozenie punktu w osi x
+			{
+			return 
+				(
+				j * sin(A) * sin(B) * cos(C) - k * cos(A) * sin(B) * cos(C) + 
+				j * cos(A) * sin(C) + k * sin(A) * sin(C) + i * cos(B) * cos(C)
+				);
+			}
 
-float calculateY(int i, int j, int k) {
-  return (
-    j * cos(A) * cos(C) + k * sin(A) * cos(C) - 
-    j * sin(A) * sin(B) * sin(C) + k * cos(A) * sin(B) * sin(C) - 
-    i * cos(B) * sin(C)
-    );
-}
+		float calculateY(int i, int j, int k) //obliczenie polozenie punktu w osi y
+			{
+				return 
+					(
+					j * cos(A) * cos(C) + k * sin(A) * cos(C) - 
+					j * sin(A) * sin(B) * sin(C) + k * cos(A) * sin(B) * sin(C) - 
+					i * cos(B) * sin(C)
+					);
+			}
 
-float calculateZ(int i, int j, int k) {
-  return (
-    k * cos(A) * cos(B) - 
-    j * sin(A) * cos(B) + i * sin(B)
-    );
-}
+		float calculateZ(int i, int j, int k) //obliczenie polozenie punktu w osi z
+			{
+				return 
+					(
+					k * cos(A) * cos(B) - 
+					j * sin(A) * cos(B) + i * sin(B)
+					);
+			}
 
-void calculateForSurface(float cubeX, float cubeY, float cubeZ, int ch) {
-  x = calculateX(cubeX, cubeY, cubeZ);
-  y = calculateY(cubeX, cubeY, cubeZ);
-  z = calculateZ(cubeX, cubeY, cubeZ) + distanceFromCam;
+		void calculateForSurface(float cubeX, float cubeY, float cubeZ, int ch) //sprawdzenie ktorej sciany szescianu dotyczy punkt
+			{
+			x = calculateX(cubeX, cubeY, cubeZ);
+			y = calculateY(cubeX, cubeY, cubeZ);
+			z = calculateZ(cubeX, cubeY, cubeZ) + distanceFromCam;
 
-  ooz = 1 / z;
+			ooz = 1 / z;
 
-  xp = (int)(width / 2 + horizontalOffset + K1 * ooz * x * 2);
-  yp = (int)(height / 2 + K1 * ooz * y);
+			xp = (int)(width / 2 + horizontalOffset + K1 * ooz * x * 2);
+			yp = (int)(height / 2 + K1 * ooz * y);
 
-  idx = xp + yp * width;
-  if (idx >= 0 && idx < width * height) {
-    if (ooz > zBuffer[idx]) {
-      zBuffer[idx] = ooz;
-      buffer[idx] = ch;
-    }
-  }
-}
+			idx = xp + yp * width;
+			if (idx >= 0 && idx < width * height) 
+				{
+				if (ooz > zBuffer[idx]) //harda matma ale ogolem zmienna ooz to wyliczenie czy sciana jest blizej czy dalej ans i jesli jest blizej to wypelnienie nasepuje znakiem sciany ktora jest blizej 
+					{
+					zBuffer[idx] = ooz;
+					buffer[idx] = ch;
+					}
+				}
+			}
+void main() {
+		int ch;
+		int temp;
+		while ((temp = getchar()) != '\n' && temp != EOF); //czyscimy bufer inputu
+		while (1) 
+			{
 
-int main() {
-  printf("\x1b[2J");
-  while (1) {
-    memset(buffer, backgroundASCIICode, width * height);
-    memset(zBuffer, 0, width * height * 4);
-    
-    
-    // first cube
-    cubeWidth = 20;
-    horizontalOffset = -2 * cubeWidth;
-    
-    for (float cubeX = -cubeWidth; cubeX < cubeWidth; cubeX += incrementSpeed) {
-      for (float cubeY = -cubeWidth; cubeY < cubeWidth;
-           cubeY += incrementSpeed) {
-        calculateForSurface(cubeX, cubeY, -cubeWidth, '@');
-        calculateForSurface(cubeWidth, cubeY, cubeX, '$');
-        calculateForSurface(-cubeWidth, cubeY, -cubeX, '~');
-        calculateForSurface(-cubeX, cubeY, cubeWidth, '#');
-        calculateForSurface(cubeX, -cubeWidth, -cubeY, ';');
-        calculateForSurface(cubeX, cubeWidth, cubeY, '+');
-      }
-    }
-    
-    
-    // second cube
-    cubeWidth = 10;
-    horizontalOffset = 1 * cubeWidth;
-    
-    for (float cubeX = -cubeWidth; cubeX < cubeWidth; cubeX += incrementSpeed) {
-      for (float cubeY = -cubeWidth; cubeY < cubeWidth;
-           cubeY += incrementSpeed) {
-        calculateForSurface(cubeX, cubeY, -cubeWidth, '@');
-        calculateForSurface(cubeWidth, cubeY, cubeX, '$');
-        calculateForSurface(-cubeWidth, cubeY, -cubeX, '~');
-        calculateForSurface(-cubeX, cubeY, cubeWidth, '#');
-        calculateForSurface(cubeX, -cubeWidth, -cubeY, ';');
-        calculateForSurface(cubeX, cubeWidth, cubeY, '+');
-      }
-    }
-    
-    
-    // third cube
-    cubeWidth = 5;
-    horizontalOffset = 8 * cubeWidth;
-    
-    for (float cubeX = -cubeWidth; cubeX < cubeWidth; cubeX += incrementSpeed) {
-      for (float cubeY = -cubeWidth; cubeY < cubeWidth;
-           cubeY += incrementSpeed) {
-        calculateForSurface(cubeX, cubeY, -cubeWidth, '@');
-        calculateForSurface(cubeWidth, cubeY, cubeX, '$');
-        calculateForSurface(-cubeWidth, cubeY, -cubeX, '~');
-        calculateForSurface(-cubeX, cubeY, cubeWidth, '#');
-        calculateForSurface(cubeX, -cubeWidth, -cubeY, ';');
-        calculateForSurface(cubeX, cubeWidth, cubeY, '+');
-      }
-    }
-    
-    printf("\x1b[H");
-    for (int k = 0; k < width * height; k++) {
-      putchar(k % width ? buffer[k] : 10);
-    }
+			fcntl(STDIN_FILENO, F_SETFL, 0 | O_NONBLOCK); //ustawiamy flage inputu zeby nie przerywalo rpacy programu
+			ch = getchar();
 
-    A += 0.05;
-    B += 0.05;
-    C += 0.01;
-    
-    usleep(8000 * 2);
-  }
-  
-  return 0;
+			if(ch != EOF)
+				{
+				while ((temp = getchar()) != '\n' && temp != EOF); //obsluga nacisniecia klawisza NETER
+				fcntl(STDIN_FILENO, F_SETFL, 0 & ~O_NONBLOCK);
+				break;
+				}
+
+			memset(buffer, backgroundASCIICode, width * height);	//memsetem czyscimy cala tablice
+			memset(zBuffer, 0, width * height * 4);
+
+			// first cube
+			cubeWidth = 10;
+			horizontalOffset = -2 * cubeWidth; 
+			for (float cubeX = -cubeWidth; cubeX < cubeWidth; cubeX += incrementSpeed) 
+				{
+				for (float cubeY = -cubeWidth; cubeY < cubeWidth;
+				   cubeY += incrementSpeed) 
+					{
+					calculateForSurface(cubeX, cubeY, -cubeWidth, '@');	
+					calculateForSurface(cubeWidth, cubeY, cubeX, '$');		//no tutaj sie dzieja obliczenia wierzcholko i wypelnienia miedzy nimi szescianu ergo wstawienie znaku do bufora projekcji
+					calculateForSurface(-cubeWidth, cubeY, -cubeX, '~');
+					calculateForSurface(-cubeX, cubeY, cubeWidth, '#');
+					calculateForSurface(cubeX, -cubeWidth, -cubeY, ';');
+					calculateForSurface(cubeX, cubeWidth, cubeY, '+');
+					}
+				}
+
+			system("clear"); //czyscimy output
+
+			for (int k = 0; k < width * height; k++) //DODAJEME KOLORKI BO TAK JEST LADNIEJ
+				{
+				//printf("%d",buffer[k]);
+				switch (buffer[k])
+					{
+				    case '@': // Czerwony
+					printf("\033[31m"); //w casach mozna dawac chary bo tak naparawde czary to sa inty
+					break;
+				    case '$': // Zielony
+					printf("\033[32m");
+					break;
+				    case '~': // Żółty
+					printf("\033[33m");
+					break;
+				    case '#': // Niebieski
+					printf("\033[34m");
+					break;
+				    case ';': // Magenta
+					printf("\033[35m");
+					break;
+				    case '+': // Cyan
+					printf("\033[36m");
+					break;
+					}
+				putchar(k % width ? buffer[k] : 10); //wczytanie chara z tablicy rpzechowuajcej obraz projekcji szescianu i wpisanie go w output
+				}
+			printf("\033[0m\nNacisnij ENTER zeby przerwac\n"); 
+
+			A += 0.05;
+			B += 0.05; //te zmienne kontroluja predkosc obortu w 3 osciach
+			C += 0.01;
+
+			usleep(8000 * 8); //pauza pentli w mikro sekundach czyli to daje nam 8000 us czyli 8 ms razy 8 to jakies 64 mikrosekundy co daje okolo 15 klatek na sekunde, ludzkie oko i tak nie widzi wiecej xD
+			}
 }
