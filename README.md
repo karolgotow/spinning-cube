@@ -1,3 +1,9 @@
+# Compiling
+gcc spinning_cube.c -lm
+
+# Running
+./a.out
+
 -added colors to output  
 -added interaction via unblocking stdio  
 -fixed buffer size glitching  
