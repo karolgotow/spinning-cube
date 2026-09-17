@@ -16,6 +16,8 @@ gcc spinning_cube.c -lm
 -changed fps to liek 15  
 -reduced cube count to 1  
 
+original author: saatvikrao/Spinning-Cube
+
 # Spinning-Cube
 This is a C language code to visualize a spinning cube using just ASCII characters. Follow the guide to know more aobut the working and possible modifications. 
 
