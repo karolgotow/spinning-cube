@@ -7,9 +7,9 @@ gcc spinning_cube.c -lm
 ./a.out
 
 # Changes
--fixed compilation errors
--fixed directories
--added build
+-fixed compilation errors  
+-fixed directories  
+-added build  
 -added colors to output  
 -added interaction via unblocking stdio  
 -fixed buffer size glitching  
